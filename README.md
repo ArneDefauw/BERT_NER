@@ -45,7 +45,7 @@ Sentence: 2,Families,NNS,O  \
 ,killed,VBN,O \
 ,in,IN,O \
 ,the,DT,O \
-... \
+... 
 
 
 One can finetune a pretrained BERT model on this data:
@@ -99,6 +99,7 @@ sentence_1      say     O \
 sentence_1      they    O \
 sentence_1      expect  O \
 sentence_1      to      O \
+...
 
 
 
