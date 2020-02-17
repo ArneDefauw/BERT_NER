@@ -53,7 +53,7 @@ One can finetune a pretrained BERT model on this data:
 --output_dir /notebook/nas-trainings/arne/OCCAM/NER_with_BERT/Fine_tuned_models/ner_en \
 --epochs 5 \
 --batch_size 64 \
---gpu 1 *
+--gpu 1*
 
 And next apply the finetuned model on a set of tokenized sentences:
 
