@@ -2,13 +2,11 @@
 
 Named entity recognition with BERT
 
-Code to train NER model with BERT.
+Code to finetune a pretrained BERT model for NER task.
 
-The following library is used. 
+The following library is used for loading pretrained BERT: 
 
 https://pypi.org/project/pytorch-pretrained-bert/
-
-This library uses pytorch.
 
 Code could, for example, be run on the following dataset: https://www.kaggle.com/abhinavwalia95/entity-annotated-corpus
 
