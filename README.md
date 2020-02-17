@@ -1,5 +1,6 @@
 # BERT_NER
-NER with BERT
+
+Named entity recognition with BERT
 
 Code to train NER model with BERT.
 
