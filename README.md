@@ -13,7 +13,7 @@ Code could, for example, be run on the following dataset: https://www.kaggle.com
 
 Training data should be in the format: 
 
-Sentence #,Word,POS,Tag
+Sentence #,Word,POS,Tag \
 Sentence: 1,Thousands,NNS,O
 ,of,IN,O
 ,demonstrators,NNS,O
