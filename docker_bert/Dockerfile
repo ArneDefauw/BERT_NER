@@ -122,6 +122,8 @@ RUN pip install keras
 
 RUN pip install seqeval
 
+RUN pip install transformers
+
 EXPOSE 8888
 
 VOLUME /notebook

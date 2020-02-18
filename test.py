@@ -4,8 +4,8 @@ import argparse
 import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
-from pytorch_pretrained_bert import BertTokenizer
-from pytorch_pretrained_bert import BertForTokenClassification
+from transformers import BertTokenizer
+from transformers import BertForTokenClassification
 from keras.preprocessing.sequence import pad_sequences
 
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             logits = model(b_input_ids, token_type_ids=None,
                            attention_mask=b_input_mask)
 
-        logits = logits.detach().cpu().numpy()
+        logits = logits[0].detach().cpu().numpy()
 
         predictions_batch = np.argmax(logits, axis=2)  #get the predicted labels
 

@@ -8,12 +8,11 @@ from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
-from pytorch_pretrained_bert import BertTokenizer, BertConfig
-from pytorch_pretrained_bert import BertForTokenClassification, BertAdam
+from transformers import BertTokenizer, BertConfig
+from transformers import BertForTokenClassification
+from transformers import WEIGHTS_NAME, CONFIG_NAME
 from seqeval.metrics import f1_score
 from tqdm import tqdm, trange
-from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
-
 
 class SentenceGetter():
     
@@ -155,7 +154,6 @@ if __name__ == "__main__":
         optimizer_grouped_parameters = [{"params": [p for n, p in param_optimizer]}]
     optimizer = Adam(optimizer_grouped_parameters, lr=3e-5)   #==> Adam function adds the keys 'lr', 'betas', 'eps', 'weight_decay', 'amsgrad' to the 'optimizer_grouped_parameters'
     
-    
     #Train the model:
     
     epochs = args.epochs
@@ -163,7 +161,7 @@ if __name__ == "__main__":
 
     for _ in trange(epochs, desc="Epoch"):
         # TRAIN loop
-        model.train()
+        model.train()  #put the model in train mode, to activate the dropout modules
         tr_loss = 0
         nb_tr_examples, nb_tr_steps = 0, 0
         for step, batch in enumerate(train_dataloader):
@@ -171,7 +169,7 @@ if __name__ == "__main__":
             batch = tuple(t.cuda( args.gpu ) for t in batch)
             b_input_ids, b_input_mask, b_labels = batch
             # forward pass
-            loss = model(b_input_ids, token_type_ids=None,
+            loss, logits = model(b_input_ids, token_type_ids=None,
                          attention_mask=b_input_mask, labels=b_labels)
             # backward pass
             loss.backward()
@@ -196,11 +194,11 @@ if __name__ == "__main__":
             b_input_ids, b_input_mask, b_labels = batch
 
             with torch.no_grad():
-                tmp_eval_loss = model(b_input_ids, token_type_ids=None,
+                tmp_eval_loss, logits = model(b_input_ids, token_type_ids=None,
                                       attention_mask=b_input_mask, labels=b_labels)
                 logits = model(b_input_ids, token_type_ids=None,
                                attention_mask=b_input_mask)
-            logits = logits.detach().cpu().numpy()
+            logits = logits[0].detach().cpu().numpy() #logits is a tuple with length 1 if no labels are provided (no loss calculation)
             label_ids = b_labels.to('cpu').numpy()
             predictions.extend([list(p) for p in np.argmax(logits, axis=2)])
             true_labels.append(label_ids)
@@ -229,8 +227,8 @@ if __name__ == "__main__":
     output_model_file = os.path.join( args.output_dir, WEIGHTS_NAME)
     output_config_file = os.path.join(args.output_dir , CONFIG_NAME)
 
-    torch.save(model_to_save.state_dict(), output_model_file)
-    model_to_save.config.to_json_file(output_config_file)
+    torch.save(model.state_dict(), output_model_file)
+    model.config.to_json_file(output_config_file)
     tokenizer.save_vocabulary(args.output_dir)
     
     with open( os.path.join( args.output_dir , "tags_vals" ) , "wb" ) as fp:
