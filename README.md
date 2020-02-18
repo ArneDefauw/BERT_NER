@@ -6,7 +6,7 @@ Code to finetune a pretrained BERT model for NER task.
 
 The following library is used for loading pretrained BERT: 
 
-https://pypi.org/project/pytorch-pretrained-bert/
+https://github.com/huggingface/transformers
 
 Code could, for example, be run on the following dataset: https://www.kaggle.com/abhinavwalia95/entity-annotated-corpus
 
