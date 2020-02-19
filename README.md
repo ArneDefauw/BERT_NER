@@ -63,6 +63,10 @@ And next apply the finetuned model on a set of tokenized sentences:
 --output_dir  /notebook/nas-trainings/arne/OCCAM/NER_with_BERT/output_folder \
 --gpu 1*
 
+By default inference will be on cpu. To do inference on cpu, set  *--gpu -1*.
+
+On gpu (GeForce RTX 2080 Titan), we obtain an inference speed of 12 000 tokens/s, while on cpu this drops to 660 tokens/s (6 threads, batch size of 32 sentences).
+
 This script will create a file *results* in the output folder with the NER results in the BIO scheme. 
 
 F.e.:
