@@ -3,6 +3,7 @@ import pickle
 import argparse
 import torch
 import numpy as np
+import time
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertTokenizer
 from transformers import BertForTokenClassification
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--seq_length", dest="seq_length", type=int ,default=75,
                         help="maximum size of the (tokenized) sentences.", required=False)
     #GPU 0 or 1 used by pytorch:
-    parser.add_argument("--gpu", dest="gpu", default=0, type=int,
+    parser.add_argument("--gpu", dest="gpu", default=-1, type=int,  #by default we run on the cpu
                         help="gpu id", required=False)
     args = parser.parse_args()
     
@@ -41,8 +42,11 @@ if __name__ == "__main__":
     tokenizer = BertTokenizer.from_pretrained( args.model_dir )
     
     #Put the model on the GPU
-    
-    model.cuda(args.gpu) 
+    if torch.cuda.is_available() and args.gpu > -1:
+        model.cuda(args.gpu) 
+        print( f"inference on gpu {args.gpu}" )
+    else:
+        print( "inference on cpu" )
 
     model.eval()
     
@@ -67,10 +71,12 @@ if __name__ == "__main__":
     predictions=[]
     predictions_tags=[]
 
+    start=time.time()
+    
     for batch in test_dataloader:
-        batch = tuple(t.cuda( args.gpu ) for t in batch)
+        if torch.cuda.is_available() and args.gpu > -1:
+            batch = tuple(t.cuda( args.gpu ) for t in batch)
         b_input_ids, b_input_mask = batch
-
         with torch.no_grad():
             logits = model(b_input_ids, token_type_ids=None,
                            attention_mask=b_input_mask)
@@ -84,6 +90,12 @@ if __name__ == "__main__":
             pred_batch_tags=[tags_vals[ p ] for p in prediction_batch ]
             predictions_tags.append( pred_batch_tags )
     
+    end=time.time()
+    
+    total_number_of_words=len([j for sub in tokenized_texts for j in sub])
+    
+    print( f"NER on {len(sentences)} sentences took {end-start} seconds (  { total_number_of_words/(end-start) } words/s ) "  )
+   
     assert len(tokenized_texts) == len(predictions_tags)
     
     predictions_tags_no_pad=[]
@@ -92,6 +104,8 @@ if __name__ == "__main__":
         for i in range( len(sentence) ):
             prediction_tags_no_pad.append(prediction_tags[i])
         predictions_tags_no_pad.append(prediction_tags_no_pad)
+    
+    
     
     #write the tokenized sentence and the predicted tags to a tab separated file:
     with open(  os.path.join( args.output_dir , "results"  ) ,  "w"  ) as fp: 
